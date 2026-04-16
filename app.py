@@ -1,5 +1,5 @@
 import streamlit as st
-from transcriptor_ruso_v2 import TranscriptorSRH, OpcionesSRH
+from transcriptor_ruso import TranscriptorSRH, OpcionesSRH
 
 # 1. Configuración de la página (Elegancia y minimalismo)
 st.set_page_config(
