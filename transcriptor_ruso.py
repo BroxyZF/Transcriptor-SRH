@@ -218,13 +218,15 @@ class TranscriptorSRH:
         
         # --- PARCHE DE PERMISOS PARA STREAMLIT CLOUD ---
         import os
-        # Forzamos a la IA a descargar sus archivos en una carpeta temporal permitida
         ruta_segura = "/tmp/ruaccent_cache"
         os.makedirs(ruta_segura, exist_ok=True)
         os.environ["HF_HOME"] = ruta_segura 
         
-        # Iniciamos el motor indicándole explícitamente su nuevo espacio de trabajo
-        motor = RUAccent(workdir=ruta_segura)
+        # 1. Iniciamos el motor SIN argumentos (para evitar el TypeError)
+        motor = RUAccent()
+        
+        # 2. Le inyectamos la ruta segura "a la fuerza" a su variable interna
+        motor.workdir = ruta_segura
         # -----------------------------------------------
         
         motor.load(omograph_model_size='big_poetry', use_dictionary=True)
