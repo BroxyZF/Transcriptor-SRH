@@ -1,8 +1,16 @@
 import re
 import sys
 import logging
+import os
 from typing import List, Tuple, Optional
 from dataclasses import dataclass
+
+# --- EL CORTAFUEGOS DE PERMISOS ---
+# Forzamos las rutas seguras ANTES de que ruaccent despierte
+os.environ["HF_HOME"] = "/tmp/huggingface_cache"
+os.environ["XDG_CACHE_HOME"] = "/tmp/cache_folder"
+os.environ["TRANSFORMERS_CACHE"] = "/tmp/transformers_cache"
+# ----------------------------------
 
 # Intentamos importar el motor de acentuación mediante PLN
 try:
@@ -216,22 +224,22 @@ class TranscriptorSRH:
     def _inicializar_motor_pln(self) -> Optional["RUAccent"]:
         print("\n[Sistema] Despertando el motor neuronal (ruaccent)...")
         
-        # --- PARCHE DE PERMISOS PARA STREAMLIT CLOUD ---
-        import os
-        ruta_segura = "/tmp/ruaccent_cache"
+        ruta_segura = "/tmp/ruaccent_modelos"
         os.makedirs(ruta_segura, exist_ok=True)
-        os.environ["HF_HOME"] = ruta_segura 
         
-        # 1. Iniciamos el motor SIN argumentos (para evitar el TypeError)
+        # Iniciamos el motor
         motor = RUAccent()
+        # Le asignamos nuestra carpeta segura directamente
+        motor.workdir = ruta_segura 
         
-        # 2. Le inyectamos la ruta segura "a la fuerza" a su variable interna
-        motor.workdir = ruta_segura
-        # -----------------------------------------------
-        
-        motor.load(omograph_model_size='big_poetry', use_dictionary=True)
-        logging.info("[Ok] Red neuronal activada.")
-        return motor
+        try:
+            # Descargamos los modelos
+            motor.load(omograph_model_size='big_poetry', use_dictionary=True)
+            logging.info("[Ok] Red neuronal activada y cargada en memoria temporal.")
+            return motor
+        except Exception as e:
+            logging.error(f"[Aviso] No se pudo descargar el modelo en la nube: {e}")
+            return None
 
     def _normalizar_acento_nlp(self, texto: str, motor_pln: "RUAccent") -> str:
         try:
