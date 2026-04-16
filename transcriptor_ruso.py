@@ -211,7 +211,7 @@ class TranscriptorSRH:
         self.tildador = TildadorRAE()
 
         if self.use_nlp:
-            self.motor_pln = self._in()
+            self.motor_pln = self._inicializar_motor_pln()
 
     def _inicializar_motor_pln(self) -> Optional["RUAccent"]:
         print("\n[Sistema] Despertando el motor neuronal (ruaccent)...")
