@@ -211,11 +211,22 @@ class TranscriptorSRH:
         self.tildador = TildadorRAE()
 
         if self.use_nlp:
-            self.motor_pln = self._inicializar_motor_pln()
+            self.motor_pln = self._in()
 
     def _inicializar_motor_pln(self) -> Optional["RUAccent"]:
         print("\n[Sistema] Despertando el motor neuronal (ruaccent)...")
-        motor = RUAccent()
+        
+        # --- PARCHE DE PERMISOS PARA STREAMLIT CLOUD ---
+        import os
+        # Forzamos a la IA a descargar sus archivos en una carpeta temporal permitida
+        ruta_segura = "/tmp/ruaccent_cache"
+        os.makedirs(ruta_segura, exist_ok=True)
+        os.environ["HF_HOME"] = ruta_segura 
+        
+        # Iniciamos el motor indicándole explícitamente su nuevo espacio de trabajo
+        motor = RUAccent(workdir=ruta_segura)
+        # -----------------------------------------------
+        
         motor.load(omograph_model_size='big_poetry', use_dictionary=True)
         logging.info("[Ok] Red neuronal activada.")
         return motor
