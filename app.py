@@ -1,125 +1,104 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from transcriptor_ruso import TranscriptorSRH, OpcionesSRH
 
-# 1. Configuración de página
+# 1. Configuración de página (Inmaculada)
 st.set_page_config(
     page_title="Sistema de Romanización Hispánico",
     page_icon="🏛️",
     layout="centered"
 )
 
-# 2. CSS para una elegancia inmaculada
+# 2. CSS Global - Refinamiento Extremo
 st.markdown("""
 <style>
-    /* Ocultar elementos predeterminados de Streamlit */
+    /* Limpieza total del lienzo */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    
-    /* Importar tipografías de Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
 
-    /* Fondo general purísimo */
-    .stApp {
+    /* Importación de fuentes premium */
+    @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
+
+    .main {
         background-color: #FFFFFF;
     }
 
-    /* Títulos principales */
+    /* Título principal con autoridad */
     h1 {
-        font-family: 'Playfair Display', serif !important;
-        color: #000000 !important;
+        font-family: 'Lora', serif;
+        font-weight: 600;
+        color: #111827;
         text-align: center;
-        font-size: 2.8rem !important;
-        font-weight: 600 !important;
+        font-size: 2.2rem;
         letter-spacing: -0.5px;
-        padding-top: 2rem;
         padding-bottom: 0px;
+        margin-top: -20px;
     }
 
+    /* Subtítulo técnico */
     .sub-header {
         font-family: 'Inter', sans-serif;
         text-align: center;
-        color: #71717A;
-        font-size: 0.85rem;
-        letter-spacing: 2.5px;
+        color: #6B7280;
+        font-size: 0.80rem;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        margin-bottom: 3.5rem;
+        margin-bottom: 50px;
         font-weight: 400;
     }
 
-    /* Área de entrada (Cirílico) - Letra más grande y clara */
+    /* Área de texto cirílico (Lectura cómoda y elegante) */
     .stTextArea textarea {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 1.25rem !important; /* Tamaño ideal para leer cirílico */
-        color: #18181B !important;
+        font-family: 'Lora', serif !important;
+        font-size: 1.2rem !important;
+        color: #374151 !important;
         background-color: #FAFAFA !important;
-        border: 1px solid #E4E4E7 !important;
-        border-radius: 6px !important;
-        padding: 1.5rem !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        padding: 20px !important;
+        line-height: 1.6 !important;
         box-shadow: none !important;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
     }
     .stTextArea textarea:focus {
-        border-color: #000000 !important;
-        box-shadow: 0 0 0 1px #000000 !important;
+        background-color: #FFFFFF !important;
+        border-color: #9CA3AF !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
     }
 
-    /* Botón minimalista */
-    .stButton>button {
+    /* Etiqueta encima del cuadro de texto */
+    .stTextArea label {
         font-family: 'Inter', sans-serif !important;
-        background-color: #FFFFFF !important;
-        color: #000000 !important;
-        border: 1px solid #D4D4D8 !important;
-        border-radius: 4px !important;
-        padding: 0.5rem 0rem !important;
         font-weight: 500 !important;
-        font-size: 0.95rem !important;
-        letter-spacing: 0.5px !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+        color: #4B5563 !important;
+        font-size: 0.9rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Botón de acción principal */
+    .stButton>button {
+        font-family: 'Inter', sans-serif;
+        background-color: #111827;
+        color: #FFFFFF;
+        border-radius: 6px;
+        border: none;
+        padding: 0.7rem 2rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-top: 10px;
     }
     .stButton>button:hover {
-        border-color: #000000 !important;
-        background-color: #FAFAFA !important;
-    }
-
-    /* TRUCO MAESTRO: Estilizar el bloque de código para que sea una tarjeta de resultado elegante con botón de copiar nativo */
-    [data-testid="stCodeBlock"] pre {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E4E4E7 !important;
-        border-radius: 8px !important;
-        padding: 3rem 2rem !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.01) !important;
-        text-align: center !important;
-    }
-    [data-testid="stCodeBlock"] code {
-        font-family: 'Playfair Display', serif !important;
-        font-size: 2rem !important; /* Tamaño imponente para el resultado */
-        color: #09090B !important;
-        line-height: 1.5 !important;
-        white-space: pre-wrap !important; /* Para que el texto baje de línea si es largo */
-    }
-    
-    /* El botón flotante de copiar dentro del resultado */
-    [data-testid="stCodeBlock"] button {
-        color: #A1A1AA !important;
-    }
-    [data-testid="stCodeBlock"] button:hover {
-        color: #000000 !important;
-    }
-
-    /* Textos de apoyo */
-    .etiqueta-input {
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        color: #52525B;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
+        background-color: #374151;
+        box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.15);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Lógica del Motor
+# 3. Motor en Caché
 @st.cache_resource
 def load_engine():
     config = OpcionesSRH(colapsar_dobles_consonantes=True)
@@ -127,35 +106,115 @@ def load_engine():
 
 engine = load_engine()
 
-# --- 4. INTERFAZ VISUAL ---
+# 4. Función constructora de la Tarjeta de Resultado HTML/JS
+def renderizar_resultado(texto):
+    html_code = f"""
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {{
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            background-color: transparent;
+        }}
+        .caja-resultado {{
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 45px 30px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }}
+        .etiqueta {{
+            font-size: 0.70rem;
+            color: #9CA3AF;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 0 25px 0;
+        }}
+        .texto-transcrito {{
+            font-family: 'Lora', serif;
+            font-size: 2.2rem;
+            color: #111827;
+            font-weight: 500;
+            margin: 0 0 35px 0;
+            line-height: 1.4;
+        }}
+        .btn-copiar {{
+            background-color: transparent;
+            border: 1px solid #D1D5DB;
+            color: #4B5563;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        .btn-copiar:hover {{
+            background-color: #F9FAFB;
+            color: #111827;
+            border-color: #9CA3AF;
+        }}
+        .btn-copiar.exito {{
+            background-color: #F0FDF4;
+            color: #166534;
+            border-color: #BBF7D0;
+        }}
+    </style>
+    <div class="caja-resultado">
+        <p class="etiqueta">Transcripción Oficial</p>
+        <p class="texto-transcrito">{texto}</p>
+        <button class="btn-copiar" id="copyBtn" onclick="copiarAlPortapapeles()">
+            <svg id="copyIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="copyText">Copiar resultado</span>
+        </button>
+    </div>
+    <script>
+        function copiarAlPortapapeles() {{
+            navigator.clipboard.writeText(`{texto}`).then(() => {{
+                const btn = document.getElementById('copyBtn');
+                const text = document.getElementById('copyText');
+                
+                btn.classList.add('exito');
+                text.innerText = '¡Copiado al portapapeles!';
+                
+                setTimeout(() => {{
+                    btn.classList.remove('exito');
+                    text.innerText = 'Copiar resultado';
+                }}, 2500);
+            }});
+        }}
+    </script>
+    """
+    components.html(html_code, height=300, scrolling=True)
 
+
+# 5. Estructura de la Web
 st.markdown("<h1>Sistema de Romanización Hispánico</h1>", unsafe_allow_html=True)
-st.markdown("<p class='sub-header'>Estándar Filológico Oficial</p>", unsafe_allow_html=True)
+st.markdown("<p class='sub-header'>Estándar Filológico Transcriptor • Ruso a Español</p>", unsafe_allow_html=True)
 
-st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+input_text = st.text_area("Texto fuente (Cirílico):", placeholder="Ej. Александр Сергеевич Пушкин...", height=140)
 
-st.markdown("<p class='etiqueta-input'>Inserte la grafía original:</p>", unsafe_allow_html=True)
-input_text = st.text_area("input", label_visibility="collapsed", placeholder="Ejemplo: Фёдор Достоевский...", height=100)
-
-st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns([1, 1.5, 1])
+col1, col2, col3 = st.columns([1,2,1])
 with col2:
-    submit = st.button("Transcribir", use_container_width=True)
+    submit = st.button("Transcribir al Español", use_container_width=True)
 
 if submit:
     if input_text.strip():
-        with st.spinner("Procesando morfología..."):
+        with st.spinner("Aplicando rigor filológico..."):
             res = engine.transcribir(input_text)
         
-        st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; font-family:Inter; font-size:0.75rem; color:#A1A1AA; letter-spacing:1px; text-transform:uppercase;'>Transcripción SRH</p>", unsafe_allow_html=True)
-        
-        # Usamos st.code pero el CSS lo transformará en una tarjeta premium
-        st.code(res, language="plaintext")
-        
+        st.markdown("<br>", unsafe_allow_html=True)
+        renderizar_resultado(res)
     else:
-        st.info("Por favor, ingrese un texto para comenzar.")
+        st.info("Por favor, ingrese un texto para transcribir.")
 
-st.markdown("<div style='height: 4rem;'></div>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#D4D4D8; font-family:Inter; font-size:0.7rem; letter-spacing:0.5px;'>VERSIÓN 2.0 • ACORDE A LAS NORMAS RAE</p>", unsafe_allow_html=True)
+st.markdown("<br><p style='text-align:center; color:#cbd5e1; font-size:0.75rem;'>Norma SRH v2.0 • Arbitraje ortográfico de la RAE activo</p>", unsafe_allow_html=True)
